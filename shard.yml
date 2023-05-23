@@ -1,0 +1,13 @@
+name: stars
+version: 0.1.0
+
+authors:
+  - R-unic <roleyspersonal@gmail.com>
+
+targets:
+  stars:
+    main: src/stars.cr
+
+crystal: 1.8.1
+
+license: MIT

@@ -4,6 +4,7 @@ require "yaml"
 module Stars
   extend self
 
+  @@path = Dir.current
   @@subcommands = ["version", "install", "init", "list", "lock", "update"]
 
   # Returns `shard.yml` as a `YAML::Any`
@@ -32,6 +33,17 @@ module Stars
     exit
   end
 
+  def parse_args(args) : Tuple(Array(String), Array(String))
+    targets = [] of String
+    options = [] of String
+
+    args.each do |arg|
+      (arg.starts_with?('-') ? options : targets) << arg
+    end
+
+    {targets, options}
+  end
+
   # Parse options
   @@options = {} of Symbol => Bool
   begin
@@ -46,7 +58,35 @@ module Stars
       opts.on("--no-dev", "Does not install development dependencies.") do
         @@options[:no_dev] = true
       end
-    end.parse(ARGV)
+
+      opts.unknown_args do |args, options|
+        case args[0]?
+        when "init"
+          # Commands::Init.run(@@path)
+        when "install"
+          # Commands::Install.run(@@path)
+        when "list"
+          # Commands::List.run(@@path, tree: args.includes?("--tree"))
+        when "lock"
+          # Commands::Lock.run(
+          #   @@path,
+          #   args[1..-1].reject(&.starts_with?("--")),
+          #   update: args.includes?("--update")
+          # )
+        when "update"
+          # Commands::Update.run(
+          #   @@path,
+          #   args[1..-1].reject(&.starts_with?("--"))
+          # )
+        when "version"
+          # Commands::Version.run(args[1]? || @@path)
+        else
+          help(opts)
+        end
+
+        exit
+      end
+    end
   rescue ex : OptionParser::InvalidOption
     puts ex.message
   end

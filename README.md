@@ -1,22 +1,15 @@
-# stars
+# Stars
 
-TODO: Write a description here
+Stars is a package manager for the Cosmo programming language.
 
 ## Installation
 
-TODO: Write installation instructions here
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
+1. Run `make install`
+2. Test to see if everything works by running `stars -v`
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/stars/fork>)
+1. Fork it (<https://github.com/R-unic/stars/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
@@ -24,4 +17,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [R-unic](https://github.com/your-github-user) - creator and maintainer
+- [R-unic](https://github.com/R-unic) - creator and maintainer

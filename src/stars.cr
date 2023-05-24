@@ -1,3 +1,4 @@
+require "./commands"
 require "option_parser"
 require "yaml"
 
@@ -62,24 +63,24 @@ module Stars
       opts.unknown_args do |args, options|
         case args[0]?
         when "init"
-          # Commands::Init.run(@@path)
+          Command::Init.run(args[1]?.nil? ? @@path : File.expand_path(args[1]))
         when "install"
-          # Commands::Install.run(@@path)
+          # Command::Install.run(@@path)
         when "list"
-          # Commands::List.run(@@path, tree: args.includes?("--tree"))
+          # Command::List.run(@@path, tree: args.includes?("--tree"))
         when "lock"
-          # Commands::Lock.run(
+          # Command::Lock.run(
           #   @@path,
           #   args[1..-1].reject(&.starts_with?("--")),
           #   update: args.includes?("--update")
           # )
         when "update"
-          # Commands::Update.run(
+          # Command::Update.run(
           #   @@path,
           #   args[1..-1].reject(&.starts_with?("--"))
           # )
         when "version"
-          # Commands::Version.run(args[1]? || @@path)
+          # Command::Version.run(args[1]? || @@path)
         else
           help(opts)
         end

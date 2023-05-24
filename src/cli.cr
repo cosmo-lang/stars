@@ -30,22 +30,26 @@ module Stars::CLI
           when "run"
             Command::Run.run(path)
           when "install"
+            puts "fatal: not implemented yet"
             # Command::Install.run(@@path, no_dev: @@options[:no_dev])
           when "list"
+            puts "fatal: not implemented yet"
             # Command::List.run(@@path, tree: args.includes?("--tree"))
           when "lock"
+            puts "fatal: not implemented yet"
             # Command::Lock.run(
             #   @@path,
             #   args[1..-1].reject(&.starts_with?("--")),
             #   update: args.includes?("--update")
             # )
           when "update"
+            puts "fatal: not implemented yet"
             # Command::Update.run(
             #   @@path,
             #   args[1..-1].reject(&.starts_with?("--"))
             # )
           when "version"
-            # Command::Version.run(args[1]? || @@path)
+            Command::Version.run(path)
           else
             help(opts)
           end
@@ -66,11 +70,11 @@ module Stars::CLI
       Commands:
         init                               - Initialize a `star.yml` file.
         run                                - Run the `entry_point` field of a `star.yml` file with Cosmo
-        install                            - Install dependencies, creating or using the `star.lock` file.
-        list                               - List installed dependencies.
-        lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them.
-        update [<shards>...]               - Update dependencies and `star.lock`.
-        version [<path>]                   - Print the current version of the star.
+        install                            - Install dependencies, creating or using the `star.lock` file. (WIP)
+        list                               - List installed dependencies. (WIP)
+        lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them. (WIP)
+        update [<shards>...]               - Update dependencies and `star.lock`. (WIP)
+        version [<path>]                   - Print the current version of the star. (WIP)
 
       General options:
       HELP

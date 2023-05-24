@@ -1,2 +1,2 @@
 require "spec"
-# require "../src/stars"
+require "../src/cli"

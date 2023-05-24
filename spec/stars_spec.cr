@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe Stars do
+describe Stars::CLI do
   # TODO: Write tests
 
   it "works" do

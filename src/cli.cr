@@ -65,6 +65,7 @@ module Stars::CLI
 
       Commands:
         init                               - Initialize a `star.yml` file.
+        run                                - Run the `entry_point` field of a `star.yml` file with Cosmo
         install                            - Install dependencies, creating or using the `star.lock` file.
         list                               - List installed dependencies.
         lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them.

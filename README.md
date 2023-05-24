@@ -1,3 +1,4 @@
+![build](https://github.com/cosmo-lang/stars/actions/workflows/crystal.yml/badge.svg)
 # Stars
 
 Stars is a package manager for the Cosmo programming language.

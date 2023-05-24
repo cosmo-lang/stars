@@ -2,6 +2,10 @@
 
 Stars is a package manager for the Cosmo programming language.
 
+# Todo
+
+- pretty much everything lol
+
 ## Installation
 
 1. Run `make install`

@@ -7,6 +7,8 @@ authors:
 targets:
   stars:
     main: src/stars.cr
+  crest:
+    github: mamantoha/crest
 
 crystal: 1.8.1
 

@@ -10,16 +10,17 @@ module Stars::CLI::Command::Init
     star_name = File.basename(CLI.path)
     File.open(File.join(CLI.path, "star.yml"), "w") do |file|
       output = IO::Memory.new
-      git_user = Process.run("git", args: ["config", "--get", "user.name"], output: output)
+      git_user = Process.run("git", args: ["config", "--get", "user.name"], output: output).success? ? output.to_s.strip : "(could not find GitHub username)"
       file << <<-STAR_YML
       name: #{star_name}
       version: 0.1.0
 
       entry_point: src/#{star_name}.⭐
+      repository: #{git_user}/#{star_name}
       authors:
-        - #{git_user.success? ? output.to_s.strip : "(could not find GitHub username)"}
+        - #{git_user}
 
-      cosmo: ^0.6.4
+      cosmo: ^0.9.8
       STAR_YML
 
       file.close

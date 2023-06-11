@@ -5,6 +5,24 @@ require "yaml"
 module Stars::CLI
   extend self
 
+  HELP_MENU = <<-HELP
+  Thank you for using Stars!
+  Usage: stars [<options>...] [<command>]
+
+  Commands:
+    init                               - Initialize a `star.yml` file.
+    run                                - Run the `entry_point` field of a `star.yml` file with Cosmo
+    install                            - Install dependencies, creating or using the `star.lock` file. (WIP)
+    list                               - List installed dependencies. (WIP)
+    lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them. (WIP)
+    publish [<package-name>]           - Upload a Star to the registry. (WIP)
+    register                           - Register as a Stars author
+    update [<shards>...]               - Update dependencies and `star.lock`. (WIP)
+    version [<path>]                   - Print the current version of the star. (WIP)
+
+  General options:
+  HELP
+
   @@options = {} of Symbol => Bool
   @@path = Dir.current
 
@@ -88,24 +106,7 @@ module Stars::CLI
   end
 
   private def help(opts)
-    puts <<-HELP
-      Thank you for using Stars!
-      Usage: stars [<options>...] [<command>]
-
-      Commands:
-        auth                               - Starts the authentication process to login as Stars author
-        init                               - Initialize a `star.yml` file.
-        run                                - Run the `entry_point` field of a `star.yml` file with Cosmo
-        install                            - Install dependencies, creating or using the `star.lock` file. (WIP)
-        list                               - List installed dependencies. (WIP)
-        lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them. (WIP)
-        publish [<package-name>]           - Upload a Star to the registry. (WIP)
-        update [<shards>...]               - Update dependencies and `star.lock`. (WIP)
-        version [<path>]                   - Print the current version of the star. (WIP)
-
-      General options:
-      HELP
-
+    puts HELP_MENU
     puts opts
     exit
   end

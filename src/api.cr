@@ -37,9 +37,10 @@ module Stars::API
 
   def user_authorized?(username : String, password : String) : Bool
     return false unless user_exists?(username)
+    # TODO: fix invalid hash string? (check password and password_hash)
     Crypto::Bcrypt::Password
-      .new(password)
-      .verify(fetch_user(username).password_hash)
+      .new(fetch_user(username).password_hash)
+      .verify(password)
   end
 
   def fetch_user(username : String) : Author

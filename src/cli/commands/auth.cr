@@ -14,6 +14,25 @@ module Stars::CLI::Command::Auth
       STDOUT.write "\e[0m".to_slice
     end
 
+    result.strip
+  end
+
+  private def validate_input(message : String, invalid_message : String, no_echo = false, fatal = false, &predicate : String -> Bool) : String
+    result = ""
+
+    loop do
+      got = input(message, no_echo)
+      valid = predicate.call(got)
+
+      if valid
+        result = got
+        break
+      else
+        abort invalid_message, 1 if fatal
+        puts invalid_message
+      end
+    end
+
     result
   end
 
@@ -30,25 +49,39 @@ module Stars::CLI::Command::Auth
     end
   end
 
+  # TODO: store logged in userinfo somewhere (env variable?)
   private def login : Nil
-    username = input("Entire your username: ")
-    password = input("Entire your password: ", no_echo: true)
+    username = validate_input("Entire your username: ", "That user does not exist") do |username|
+      API.user_exists?(username)
+    end
+
+    validate_input(
+      "Entire your password: ",
+      "Invalid password",
+      no_echo: true,
+      fatal: true
+    ) do |password|
+
+      matches = false
+
+      begin
+        author = API.fetch_user(username)
+        encrypted = Crypto::Bcrypt::Password.new(author.password_hash)
+        matches = encrypted.verify(password)
+      rescue ex : Exception
+        puts "Failed to fetch user: #{ex.message}"
+      end
+
+      matches
+    end
+
+    puts "Successfully logged in as '#{username}'!"
   end
 
   private def register : Nil
     username = input("Entire your desired username: ")
-
-    email = ""
-    asked_email = false
-    loop do
-      got_email = input("Entire your desired e-mail: ")
-      valid = !!(got_email =~ VALID_EMAIL_REGEX)
-      puts "Invalid email" if asked_email && !valid
-      if valid
-        asked_email = true
-        email = got_email
-        break
-      end
+    email = validate_input("Entire your desired e-mail: ", "Invalid e-mail") do |email|
+      !!(email =~ VALID_EMAIL_REGEX)
     end
 
     password = input("Entire your desired password: ", no_echo: true)

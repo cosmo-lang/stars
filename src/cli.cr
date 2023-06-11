@@ -8,6 +8,20 @@ module Stars::CLI
   @@options = {} of Symbol => Bool
   @@path = Dir.current
 
+  def get_star_yml_field(path : String, optional = false)
+    star_path = File.join path, "star.yml"
+    unless File.exists?(star_path)
+      abort "fatal: missing star.yml", 1
+    end
+
+    raw_yaml = File.read(star_path)
+    star_yaml = YAML.parse(raw_yaml)
+    value = star_yaml["version"]?
+    if value.nil?
+      abort "fatal: missing 'version' field in star.yml", 1
+    end
+  end
+
   def run
     begin
       OptionParser.parse(ARGV) do |opts|
@@ -25,6 +39,9 @@ module Stars::CLI
         opts.unknown_args do |args, options|
           path = args[1]?.nil? ? @@path : File.expand_path(args[1])
           case args[0]?
+          when "auth"
+            puts "fatal: not implemented yet"
+            # Command::Auth.run
           when "init"
             Command::Init.run(path)
           when "run"
@@ -42,6 +59,12 @@ module Stars::CLI
             #   args[1..-1].reject(&.starts_with?("--")),
             #   update: args.includes?("--update")
             # )
+          when "publish"
+            puts "fatal: not implemented yet"
+            # Command::Update.run(
+            #   @@path,
+            #   args[1..-1].reject(&.starts_with?("--"))
+            # )
           when "update"
             puts "fatal: not implemented yet"
             # Command::Update.run(
@@ -49,7 +72,7 @@ module Stars::CLI
             #   args[1..-1].reject(&.starts_with?("--"))
             # )
           when "version"
-            Command::Version.run(path)
+            puts get_star_yml_field("version")
           else
             help(opts)
           end
@@ -68,11 +91,13 @@ module Stars::CLI
       Usage: stars [<options>...] [<command>]
 
       Commands:
+        auth                               - Starts the authentication process to login as Stars author
         init                               - Initialize a `star.yml` file.
         run                                - Run the `entry_point` field of a `star.yml` file with Cosmo
         install                            - Install dependencies, creating or using the `star.lock` file. (WIP)
         list                               - List installed dependencies. (WIP)
         lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them. (WIP)
+        publish [<package-name>]           - Upload a Star to the registry. (WIP)
         update [<shards>...]               - Update dependencies and `star.lock`. (WIP)
         version [<path>]                   - Print the current version of the star. (WIP)
 

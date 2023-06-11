@@ -1,11 +1,9 @@
-require "file_utils"
-require "../api"
-require "./commands/auth"
-require "./commands/init"
-require "./commands/run"
+require "readline"
 
 module Stars::CLI::Command
-  def self.input(message : String, no_echo = false) : String
+  extend self
+
+  def input(message : String, no_echo = false) : String
     result : String? = nil
 
     while result.nil? || result.empty?
@@ -17,7 +15,14 @@ module Stars::CLI::Command
     result.strip
   end
 
-  def self.validate_input(message : String, invalid_message : String, no_echo = false, fatal = false, &predicate : String -> Bool) : String
+  def validate_input(
+    message : String,
+    invalid_message : String,
+    no_echo = false,
+    fatal = false,
+    &predicate : String -> Bool
+  ) : String
+
     result = ""
 
     loop do
@@ -36,3 +41,10 @@ module Stars::CLI::Command
     result
   end
 end
+
+require "file_utils"
+require "../api"
+require "./commands/init"
+require "./commands/publish"
+require "./commands/register"
+require "./commands/run"

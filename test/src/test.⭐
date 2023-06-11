@@ -1,0 +1,4 @@
+public int fn main(string[] args) {
+  puts("Hello, world!")
+  0
+}

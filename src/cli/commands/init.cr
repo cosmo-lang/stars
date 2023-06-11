@@ -1,14 +1,14 @@
 module Stars::CLI::Command::Init
   extend self
 
-  def run(path : String) : Nil
-    unless File.exists?(path)
+  def run : Nil
+    unless File.exists?(CLI.path)
       puts "Created project folder."
     end
-    FileUtils.mkdir_p(path)
+    FileUtils.mkdir_p(CLI.path)
 
-    star_name = File.basename(path)
-    File.open(File.join(path, "star.yml"), "w") do |file|
+    star_name = File.basename(CLI.path)
+    File.open(File.join(CLI.path, "star.yml"), "w") do |file|
       output = IO::Memory.new
       git_user = Process.run("git", args: ["config", "--get", "user.name"], output: output)
       file << <<-STAR_YML
@@ -26,10 +26,10 @@ module Stars::CLI::Command::Init
     end
     puts "Created star.yml."
 
-    FileUtils.mkdir_p(File.join path, "src")
+    FileUtils.mkdir_p(File.join CLI.path, "src")
     puts "Created source directory."
 
-    entry_point = File.join(path, "src", "#{star_name}.⭐")
+    entry_point = File.join(CLI.path, "src", "#{star_name}.⭐")
     File.open(entry_point, "w") do |file|
       file << <<-COSMO
       public int fn main(string[] args) {
@@ -42,6 +42,6 @@ module Stars::CLI::Command::Init
     puts "Created #{File.basename(entry_point)}."
 
     puts "Initializing git repository..."
-    puts `git init #{path}`
+    puts `git init #{CLI.path}`
   end
 end

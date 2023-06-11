@@ -2,14 +2,15 @@ require "crest"
 require "uri"
 require "http/client"
 require "crypto/bcrypt/password"
-require "./api/structs"
+require "./api_structs"
 
 module Stars::API
   extend self
+  private URL = "http://localhost:3030/api/packages/"
 
   def up? : Bool
     begin
-      !HTTP::Client.get(API_URL).body?.nil?
+      !HTTP::Client.get(URL).body?.nil?
     rescue Socket::ConnectError
       false
     end
@@ -25,10 +26,8 @@ module Stars::API
 
   def user_exists?(username : String) : Bool
     begin
-      response = Crest.get(API_URL + username)
-      unless response.status_code == 200
-        raise
-      end
+      response = begin_request { Crest.get(URL + username) }
+      response.success? && API::Response.from_json(response.body).success?
     rescue Crest::NotFound
       false
     rescue Crest::InternalServerError
@@ -38,23 +37,46 @@ module Stars::API
 
   def user_authorized?(username : String, password : String) : Bool
     return false unless user_exists?(username)
-    author = fetch_user(username)
-    hashed = Crypto::Bcrypt::Password.new(password)
-    hashed.verify(author.password_hash)
+    Crypto::Bcrypt::Password
+      .new(password)
+      .verify(fetch_user(username).password_hash)
   end
 
   def fetch_user(username : String) : Author
-    response = ::API::Response.from_json Crest.get(API_URL + username).body
-    response.result.as Author
+    response = begin_request { Crest.get(URL + username) }
+    API::Response.from_json(response.body).result.as Author
   end
 
-  # Returns the response respective to the create user request
+  def auth_token(username : String) : String
+    response = begin_request { Crest.get(URL + "auth/" + username) }
+    info = API::Response.from_json(response.body).result.as(AuthenticationInfo)
+    info.token
+  end
+
   def create_user(name : String, email : String, password : String) : Crest::Response
     begin_request {
-      Crest.post API_URL, {
+      Crest.post URL, {
         "authorName" =>  name,
         "email" =>  email,
         "password" =>  password
+      }, json: true
+    }
+  end
+
+  def create_package(
+    username : String,
+    password : String,
+    packageName : String,
+    repository : String,
+    authenticationToken : String
+  ) : Crest::Response
+
+    begin_request {
+      Crest.post "#{URL}/#{username}", {
+        "packageName" =>  packageName,
+        "repository" =>  repository,
+        "authorPassword" =>  password,
+        "authenticationToken" =>  password
       }, json: true
     }
   end

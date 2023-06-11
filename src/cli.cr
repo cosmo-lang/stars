@@ -8,7 +8,11 @@ module Stars::CLI
   @@options = {} of Symbol => Bool
   @@path = Dir.current
 
-  def get_star_yml_field(path : String, optional = false)
+  def path : String
+    @@path
+  end
+
+  def get_star_yml_field(field_name : String, optional = false) : YAML::Any
     star_path = File.join path, "star.yml"
     unless File.exists?(star_path)
       abort "fatal: missing star.yml", 1
@@ -16,10 +20,12 @@ module Stars::CLI
 
     raw_yaml = File.read(star_path)
     star_yaml = YAML.parse(raw_yaml)
-    value = star_yaml["version"]?
+    value = star_yaml[field_name]?
     if value.nil?
-      abort "fatal: missing 'version' field in star.yml", 1
+      abort "fatal: missing '#{field_name}' field in star.yml", 1
     end
+
+    value
   end
 
   def run
@@ -37,12 +43,13 @@ module Stars::CLI
         end
 
         opts.unknown_args do |args, options|
-          path = args[1]?.nil? ? @@path : File.expand_path(args[1])
+          @@path = args[1]?.nil? ? @@path : File.expand_path(args[1])
+
           case args[0]?
           when "init"
-            Command::Init.run(path)
+            Command::Init.run
           when "run"
-            Command::Run.run(path)
+            Command::Run.run
           when "install"
             puts "fatal: not implemented yet"
             # Command::Install.run(@@path, no_dev: @@options[:no_dev])
@@ -67,7 +74,7 @@ module Stars::CLI
             #   args[1..-1].reject(&.starts_with?("--"))
             # )
           when "version"
-            puts get_star_yml_field("version")
+            puts get_star_yml_field("version").to_s
           else
             help(opts)
           end

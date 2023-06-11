@@ -4,19 +4,19 @@ module Stars::CLI::Command::Auth
   private def input(message : String, no_echo = false) : String
     STDOUT.write(message.to_slice)
     if no_echo
-      STDIN.noecho
+      STDIN.noecho { (STDIN.gets || "").chomp }
     else
-      STDIN.gets.chomp
+      (STDIN.gets || "").chomp
     end
   end
 
   private def prompt_login_or_register : Bool
-    case input("Are you trying to login or register? ").lower
+    case input("Are you trying to login or register? ").downcase
     when "login"
-      puts "Chose to log in to account..."
+      puts "Logging in to account..."
       true
     when "register"
-      puts "Chose to register account..."
+      puts "Registering account..."
       false
     else
       prompt_login_or_register
@@ -25,6 +25,7 @@ module Stars::CLI::Command::Auth
 
   def run : Nil
     puts "Starting authorization..."
+    abort "Failed to connect to registry. The registry is currently offline, please try again later.", 1 unless API.up?
 
     logging_in = prompt_login_or_register
     if logging_in
@@ -39,7 +40,7 @@ module Stars::CLI::Command::Auth
       unless response.status_code == 200
         abort "Registration failed: #{JSON.parse(response.body)["message"]}", 1
       end
-      puts "Successfully registered author '#{username}'!"
+      puts "Registered author '#{username}' successfully!"
     end
   end
 end

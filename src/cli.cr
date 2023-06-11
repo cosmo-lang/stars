@@ -40,8 +40,7 @@ module Stars::CLI
           path = args[1]?.nil? ? @@path : File.expand_path(args[1])
           case args[0]?
           when "auth"
-            puts "fatal: not implemented yet"
-            # Command::Auth.run
+            Command::Auth.run
           when "init"
             Command::Init.run(path)
           when "run"

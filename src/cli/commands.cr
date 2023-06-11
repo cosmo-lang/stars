@@ -1,4 +1,5 @@
 require "file_utils"
 require "./api_wrapper"
+require "./commands/auth"
 require "./commands/init"
 require "./commands/run"

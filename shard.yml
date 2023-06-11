@@ -11,6 +11,8 @@ targets:
 dependencies:
   crest:
     github: mamantoha/crest
+  readline:
+    github: crystal-lang/crystal-readline
 
 crystal: ">= 1.8.2"
 license: MIT

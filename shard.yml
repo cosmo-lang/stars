@@ -10,6 +10,5 @@ targets:
   crest:
     github: mamantoha/crest
 
-crystal: 1.8.1
-
+crystal: ">= 1.8.2"
 license: MIT

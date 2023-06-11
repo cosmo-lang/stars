@@ -1,39 +1,8 @@
 require "crest"
 require "uri"
-require "json"
 require "http/client"
 require "crypto/bcrypt/password"
-
-struct Package
-  include JSON::Serializable
-
-  getter id : String
-  getter name : String
-  getter repository : String
-  getter author : Author
-  @[JSON::Field(key: "authorId")]
-  getter author_id : String
-end
-
-struct Author
-  include JSON::Serializable
-
-  getter id : String
-  getter name : String
-  getter email : String
-
-  @[JSON::Field(key: "passwordHash")]
-  getter password_hash : String
-  getter packages : Array(Package)
-end
-
-struct APIResponse
-  include JSON::Serializable
-
-  @[JSON::Field(key: "success")]
-  getter? success : Bool
-  getter result : Package | Author
-end
+require "./api/structs"
 
 module Stars::API
   extend self
@@ -56,7 +25,10 @@ module Stars::API
 
   def user_exists?(username : String) : Bool
     begin
-      Crest.get(API_URL + username).status_code == 200
+      response = Crest.get(API_URL + username)
+      unless response.status_code == 200
+        raise
+      end
     rescue Crest::NotFound
       false
     rescue Crest::InternalServerError
@@ -64,8 +36,15 @@ module Stars::API
     end
   end
 
+  def user_authorized?(username : String, password : String) : Bool
+    return false unless user_exists?(username)
+    author = fetch_user(username)
+    hashed = Crypto::Bcrypt::Password.new(password)
+    hashed.verify(author.password_hash)
+  end
+
   def fetch_user(username : String) : Author
-    response = APIResponse.from_json Crest.get(API_URL + username).body
+    response = ::API::Response.from_json Crest.get(API_URL + username).body
     response.result.as Author
   end
 

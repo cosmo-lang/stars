@@ -39,8 +39,6 @@ module Stars::CLI
         opts.unknown_args do |args, options|
           path = args[1]?.nil? ? @@path : File.expand_path(args[1])
           case args[0]?
-          when "auth"
-            Command::Auth.run
           when "init"
             Command::Init.run(path)
           when "run"
@@ -59,11 +57,9 @@ module Stars::CLI
             #   update: args.includes?("--update")
             # )
           when "publish"
-            puts "fatal: not implemented yet"
-            # Command::Update.run(
-            #   @@path,
-            #   args[1..-1].reject(&.starts_with?("--"))
-            # )
+            Command::Publish.run
+          when "register"
+            Command::Register.run
           when "update"
             puts "fatal: not implemented yet"
             # Command::Update.run(

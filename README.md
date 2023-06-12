@@ -4,6 +4,7 @@ Stars is a package manager for the Cosmo programming language. It is in no way f
 
 # Todo
 
+- `star.lock` files
 - Make installed packages add their dependencies directly to `.stars`
 - Version schemes
   * `~1.6.1` (`1.0.0` to `1.6.1`)

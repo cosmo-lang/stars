@@ -15,7 +15,7 @@ module Stars::CLI::Command::Init
       name: #{star_name}
       version: 0.1.0
 
-      entry_point: src/#{star_name}.⭐
+      entry_point: #{star_name}.⭐
       repository: #{git_user}/#{star_name}
       authors:
         - #{git_user}
@@ -27,10 +27,7 @@ module Stars::CLI::Command::Init
     end
     puts "Created star.yml."
 
-    FileUtils.mkdir_p(File.join CLI.path, "src")
-    puts "Created source directory."
-
-    entry_point = File.join(CLI.path, "src", "#{star_name}.⭐")
+    entry_point = File.join CLI.path, "#{star_name}.⭐"
     File.open(entry_point, "w") do |file|
       file << <<-COSMO
       public int fn main(string[] args) {

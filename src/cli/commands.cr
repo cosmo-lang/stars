@@ -45,6 +45,7 @@ end
 require "file_utils"
 require "../api"
 require "./commands/init"
+require "./commands/install"
 require "./commands/publish"
 require "./commands/register"
 require "./commands/run"

@@ -21,6 +21,8 @@ module Stars::CLI::Command::Publish
     packageName = Command.input("What do you want to name your package? ")
     repository = CLI.get_star_yml_field("repository").to_s
     authenticationToken = API.auth_token(username)
+
+    # TODO: if package exists use API.update_package (currently unimplemented)
     API.create_package(username, password, packageName, repository, authenticationToken)
   end
 end

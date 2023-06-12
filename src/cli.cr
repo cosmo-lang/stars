@@ -1,3 +1,4 @@
+require "./cli/colors"
 require "./cli/commands"
 require "option_parser"
 require "yaml"
@@ -30,7 +31,7 @@ module Stars::CLI
     @@path
   end
 
-  def get_star_yml_field(field_name : String, optional = false) : YAML::Any
+  def get_star_yml_field(field_name : String, optional = false) : YAML::Any?
     star_path = File.join path, "star.yml"
     unless File.exists?(star_path)
       abort "fatal: missing star.yml", 1
@@ -39,7 +40,7 @@ module Stars::CLI
     raw_yaml = File.read(star_path)
     star_yaml = YAML.parse(raw_yaml)
     value = star_yaml[field_name]?
-    if value.nil?
+    if value.nil? && !optional
       abort "fatal: missing '#{field_name}' field in star.yml", 1
     end
 
@@ -61,16 +62,20 @@ module Stars::CLI
         end
 
         opts.unknown_args do |args, options|
-          @@path = args[1]?.nil? ? @@path : File.expand_path(args[1])
+          command = (args.first? || "").downcase
+          unless args[1]?.nil?
+            unless command == "install"
+              @@path = File.expand_path(args[1])
+            end
+          end
 
-          case args[0]?
+          case args.first?
           when "init"
             Command::Init.run
           when "run"
             Command::Run.run
           when "install"
-            puts "fatal: not implemented yet"
-            # Command::Install.run(@@path, no_dev: @@options[:no_dev])
+            Command::Install.run(args[1]?, no_dev: @@options[:no_dev]?)
           when "list"
             puts "fatal: not implemented yet"
             # Command::List.run(@@path, tree: args.includes?("--tree"))

@@ -1,9 +1,0 @@
-name: test
-version: 0.1.0
-
-entry_point: src/test.⭐
-repository: R-unic/test
-authors:
-  - R-unic
-
-cosmo: ^0.9.8

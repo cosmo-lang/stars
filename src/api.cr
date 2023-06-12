@@ -39,7 +39,7 @@ module Stars::API
     return false unless user_exists?(username)
     author = fetch_user(username, expose_password: true)
     Crypto::Bcrypt::Password
-      .new(author.password_hash)
+      .new(author.password_hash.not_nil!)
       .verify(password)
   end
 
@@ -49,6 +49,7 @@ module Stars::API
         {"exposePassword" => expose_password.to_s},
         json: true
     }
+
     API::Response.from_json(response.body).result.as Author
   end
 
@@ -81,7 +82,7 @@ module Stars::API
         "packageName" =>  packageName,
         "repository" =>  repository,
         "authorPassword" =>  password,
-        "authenticationToken" =>  password
+        "authenticationToken" =>  authenticationToken
       }, json: true
     }
   end

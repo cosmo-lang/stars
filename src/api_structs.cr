@@ -21,7 +21,7 @@ module Stars::API
     getter email : String
 
     @[JSON::Field(key: "passwordHash")]
-    getter password_hash : String
+    getter password_hash : String?
     getter packages : Array(Package)
   end
 

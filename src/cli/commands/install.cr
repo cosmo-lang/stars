@@ -110,7 +110,7 @@ module Stars::CLI::Command::Install
     end
 
     # TODO: lock versions
-    post_install(package_install_folder, full_name, version)
+    post_install(full_name, version)
     puts Color.green "Successfully installed package #{full_name}@#{version}!"
   end
 

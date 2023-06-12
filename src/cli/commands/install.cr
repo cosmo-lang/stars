@@ -5,17 +5,24 @@ module Stars::CLI::Command::Install
 
   @@install_folder = File.expand_path File.join(CLI.path, ".stars")
 
-  private def run_command(process : String, args : String, err_message : String, include_status = true) : String
+  # Executes a git command
+  private def git(args : String, err_message : String, chdir : String? = nil) : String
     output = IO::Memory.new
-    status = Process.run(process, args.split(' '), output: output)
+    prev_pwd = Dir.current
+    Dir.cd(chdir) unless chdir.nil?
 
-    if status.to_s.split('\n').last.starts_with?("fatal:") || !status.success?
-      CLI.fatal "#{err_message}#{include_status ? ": #{status.exit_reason}" : ""}"
+    Process.run("git", args.split(' '), output: output, error: output)
+    puts "- git #{args}"
+
+    if output.to_s.split('\n').last.starts_with?("fatal:")
+      CLI.fatal "#{err_message}: \n#{output.to_s}"
     end
 
+    Dir.cd(prev_pwd) unless chdir.nil?
     output.to_s
   end
 
+  # Verifies that the given version fits the version given in star.yml
   private def verify_version(version : String) : Nil
     expected_version = CLI.get_star_yml_field("version").to_s
 
@@ -25,6 +32,8 @@ module Stars::CLI::Command::Install
     end
   end
 
+  # Resolves a dependency by author/name scheme
+  private alias Dependencies = Hash(YAML::Any, YAML::Any)
   private def resolve_dependency(full_name : String, development = false) : Nil
     unless full_name.includes?('/')
       CLI.fatal "Invalid package name. Correct format: \"author/package\""
@@ -40,39 +49,57 @@ module Stars::CLI::Command::Install
     end
 
     puts "Installing #{full_name}..."
-    FileUtils.mkdir_p(package_install_folder)
+    unless File.directory?(package_install_folder)
+      FileUtils.mkdir(package_install_folder)
+    end
+
     entries = Dir.entries(package_install_folder)
     package = API.fetch_package(author_name, package_name)
     repo_name = package.repository
+
     if entries.empty?
-      run_command("git", "clone https://github.com/#{repo_name}.git #{@@install_folder}", "Failed to clone repository '#{repo_name}'")
+      git("clone https://github.com/#{repo_name}.git .", "Failed to clone repository '#{repo_name}'", chdir: package_install_folder)
     else
       FileUtils.rm_rf File.join(package_install_folder, "star.lock")
-      run_command("git", "pull origin master", "Failed to pull from repository '#{repo_name}'.")
+      git("pull origin master", "Failed to pull from repository '#{repo_name}'.", chdir: package_install_folder)
     end
 
     puts "Fetching tags..."
-    run_command("git", "fetch --tags", "Failed to fetch tags from repository '#{repo_name}'")
+    git("fetch --tags", "Failed to fetch tags from repository '#{repo_name}'", chdir: package_install_folder)
+
     unless version == "latest"
       puts "Finding version tag..."
-      version = run_command("git", "describe --tags --match #{version} --abbrev=0", "Version #{version} release tag does not exist on repository '#{repo_name}'.", include_status: false)
+      version = git(
+        "describe --tags --match #{version} --abbrev=0",
+        "Version #{version} release tag does not exist on repository '#{repo_name}'.",
+        chdir: package_install_folder
+      )
+
       verify_version(version)
       puts "Checking out version #{version}..."
-      run_command("git", "checkout #{version}", "Failed to checkout tag #{version}")
+      git("checkout #{version}", "Failed to checkout tag #{version}")
     else
       puts "Finding version tag..."
-      version = run_command("git", "describe --tags --abbrev=0", "No release tags exist on repository '#{repo_name}'. Please create one and try again.", include_status: false)
+      version = git(
+        "describe --tags --abbrev=0",
+        "No release tags exist on repository '#{repo_name}'. Please create one and try again.",
+        chdir: package_install_folder
+      )
+
       verify_version(version)
     end
 
     dependency_list = CLI.get_star_yml_field("dependencies", optional: true)
     if dependency_list.nil?
-      dependency_list = {} of String => String
+      new_dependency_list = Dependencies.new
+      new_dependency_list[YAML::Any.new(full_name)] = YAML::Any.new(version)
     else
       new_dependency_list = dependency_list.as_h
       new_dependency_list[YAML::Any.new(full_name)] = YAML::Any.new(version)
-      CLI.set_star_yml_field("dependencies", YAML::Any.new(new_dependency_list))
     end
+
+    # TODO: allow version schemes here (~, ^)
+    CLI.set_star_yml_field("dependencies", YAML::Any.new(new_dependency_list))
 
     # TODO: lock versions
     puts Color.green "Successfully installed package #{full_name}@#{version}!"

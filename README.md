@@ -5,7 +5,9 @@ Stars is a package manager for the Cosmo programming language.
 
 # Todo
 
-- pretty much everything lol
+- Version schemes
+  * `~1.6.1` (`1.0.0` to `1.6.1`)
+  * `^3.2.3` (`3.2.3` or higher)
 
 ## Installation
 

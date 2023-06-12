@@ -49,7 +49,7 @@ module Stars::CLI
       .split('\n')
       .shift(1)
       .map! { |l|
-        l.starts_with("- ") ? "\t" + l : l
+        l.starts_with?("- ") ? "\t" + l : l
       }.join("\n\n")
 
     File.write(star_path, formatted_yaml)

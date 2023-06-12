@@ -46,7 +46,7 @@ module Stars::CLI
     yaml_hash = star_yaml.as_h
     yaml_hash[YAML::Any.new(field_name)] = value
 
-    File.write(star_path, YAML::Any.new(yaml_hash))
+    File.write(star_path, yaml_hash.to_yaml)
   end
 
   def get_star_yml_field(field_name : String, optional = false, search_path = path) : YAML::Any?

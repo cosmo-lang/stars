@@ -25,6 +25,7 @@ module Stars::CLI::Command::Install
 
   # Verifies that the given version fits the version given in star.yml
   private def verify_version(folder_path : String, version : String) : Nil
+    puts "Verifying version validity..."
     expected_version = CLI.get_star_yml_field("version", search_path: folder_path).to_s
 
     # TODO: handle version schemes like ~ and ^
@@ -33,11 +34,11 @@ module Stars::CLI::Command::Install
     end
   end
 
-  private def post_install(folder_path : String, package_name : String, version : String)
+  private def post_install(package_name : String, version : String, dev = false)
+    puts "Adding to star.yml..."
     dependency_list = CLI.get_star_yml_field(
-      "dependencies",
-      optional: true,
-      search_path: folder_path
+      (dev ? "dev_" : "") + "dependencies",
+      optional: true
     )
 
     if dependency_list.nil?
@@ -49,9 +50,8 @@ module Stars::CLI::Command::Install
     new_dependency_list[YAML::Any.new(package_name)] = YAML::Any.new(version)
     # TODO: allow version schemes here (~, ^)
     CLI.set_star_yml_field(
-      "dependencies",
-      YAML::Any.new(new_dependency_list),
-      search_path: folder_path
+      (dev ? "dev_" : "") + "dependencies",
+      YAML::Any.new(new_dependency_list)
     )
   end
 
@@ -72,6 +72,7 @@ module Stars::CLI::Command::Install
     end
 
     puts "Installing #{full_name}..."
+    CLI.get_star_yml_field("version")
     not_cached = !File.directory?(package_install_folder) || Dir.entries(package_install_folder).empty?
     package = API.fetch_package(author_name, package_name)
     repo_name = package.repository
@@ -85,19 +86,16 @@ module Stars::CLI::Command::Install
       git("checkout #{version}", package_install_folder, "Failed to checkout tag #{version}")
     end
 
-    puts "Fetching repository info..."
+    puts "Finding version tag..."
+
     repo = GitRepository.new(repo_link)
     unless version == "latest"
-      puts "Finding version tag..."
-
       unless repo.tags.has_key?(version)
         CLI.fatal "Version #{version} release tag does not exist on repository '#{repo_name}'."
       end
 
       verify_version(package_install_folder, version)
-
     else
-      puts "Finding version tag..."
       version = repo.tags.first_key?
       if version.nil?
         CLI.fatal "No release tags exist on repository '#{repo_name}'. Please create one and try again."

@@ -45,8 +45,14 @@ module Stars::CLI
     star_yaml = YAML.parse(raw_yaml)
     yaml_hash = star_yaml.as_h
     yaml_hash[YAML::Any.new(field_name)] = value
+    formatted_yaml = yaml_hash.to_yaml
+      .split('\n')
+      .shift(1)
+      .map! { |l|
+        l.starts_with("- ") ? "\t" + l : l
+      }.join("\n\n")
 
-    File.write(star_path, yaml_hash.to_yaml)
+    File.write(star_path, formatted_yaml)
   end
 
   def get_star_yml_field(field_name : String, optional = false, search_path = path) : YAML::Any?

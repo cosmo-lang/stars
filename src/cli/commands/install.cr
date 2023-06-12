@@ -5,10 +5,23 @@ module Stars::CLI::Command::Install
 
   @@install_folder = File.expand_path File.join(CLI.path, ".stars")
 
-  private def run_command(process : String, args : String, err_message : String, include_status = true) : Nil
-    status = Process.run(process, args.split(' '))
+  private def run_command(process : String, args : String, err_message : String, include_status = true) : String
+    output = IO::Memory.new
+    status = Process.run(process, args.split(' '), output: output)
+
     if status.to_s.split('\n').last.starts_with?("fatal:") || !status.success?
       CLI.fatal "#{err_message}#{include_status ? ": #{status.exit_reason}" : ""}"
+    end
+
+    output.to_s
+  end
+
+  private def verify_version(version : String) : Nil
+    expected_version = CLI.get_star_yml_field("version").to_s
+
+    # TODO: handle version schemes like ~ and ^
+    unless version == expected_version
+      CLI.fatal "Version mismatch. Expected version matching '#{expected_version}' but got '#{version}'."
     end
   end
 
@@ -42,12 +55,14 @@ module Stars::CLI::Command::Install
     run_command("git", "fetch --tags", "Failed to fetch tags from repository '#{repo_name}'")
     unless version == "latest"
       puts "Finding version tag..."
-      run_command("git", "describe --tags --match #{version} --abbrev=0", "Version #{version} release tag does not exist on repository '#{repo_name}'.", include_status: false)
+      version = run_command("git", "describe --tags --match #{version} --abbrev=0", "Version #{version} release tag does not exist on repository '#{repo_name}'.", include_status: false)
+      verify_version(version)
       puts "Checking out version #{version}..."
       run_command("git", "checkout #{version}", "Failed to checkout tag #{version}")
     else
       puts "Finding version tag..."
-      run_command("git", "describe --tags --abbrev=0", "No release tags exist on repository '#{repo_name}'. Please create one and try again.", include_status: false)
+      version = run_command("git", "describe --tags --abbrev=0", "No release tags exist on repository '#{repo_name}'. Please create one and try again.", include_status: false)
+      verify_version(version)
     end
 
     dependency_list = CLI.get_star_yml_field("dependencies", optional: true)

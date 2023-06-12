@@ -12,7 +12,7 @@ module Stars::CLI::Command::Install
     end
   end
 
-  private def resolve_dependency(full_name : String) : Nil
+  private def resolve_dependency(full_name : String, development = false) : Nil
     unless full_name.includes?('/')
       CLI.fatal "Invalid package name. Correct format: \"author/package\""
     end
@@ -38,7 +38,6 @@ module Stars::CLI::Command::Install
       run_command("git", "pull origin master", "Failed to pull from repository '#{repo_name}'.")
     end
 
-    # TODO: lock versions
     puts "Fetching tags..."
     run_command("git", "fetch --tags", "Failed to fetch tags from repository '#{repo_name}'")
     unless version == "latest"
@@ -51,10 +50,20 @@ module Stars::CLI::Command::Install
       run_command("git", "describe --tags --abbrev=0", "No release tags exist on repository '#{repo_name}'. Please create one and try again.", include_status: false)
     end
 
+    dependency_list = CLI.get_star_yml_field("dependencies", optional: true)
+    if dependency_list.nil?
+      dependency_list = {} of String => String
+    else
+      new_dependency_list = dependency_list.as_h
+      new_dependency_list[YAML::Any.new(full_name)] = YAML::Any.new(version)
+      CLI.set_star_yml_field("dependencies", YAML::Any.new(new_dependency_list))
+    end
+
+    # TODO: lock versions
     puts Color.green "Successfully installed package #{full_name}@#{version}!"
   end
 
-  def run(package_name : String?, no_dev = false) : Nil
+  def run(package_name : String?, no_dev = false, as_dev = false) : Nil
     FileUtils.mkdir_p(@@install_folder)
 
     if package_name.nil?
@@ -64,7 +73,7 @@ module Stars::CLI::Command::Install
         dev_dependency_list = CLI.get_star_yml_field("dev_dependencies", optional: true)
         unless dev_dependency_list.nil? || dev_dependency_list.as_a?.nil?
           dev_dependency_list.as_a.each do |dev_dependency|
-            resolve_dependency(dev_dependency.to_s)
+            resolve_dependency(dev_dependency.to_s, development: true)
           end
         end
       end
@@ -75,7 +84,7 @@ module Stars::CLI::Command::Install
         end
       end
     else
-      resolve_dependency(package_name)
+      resolve_dependency(package_name, development: as_dev)
     end
   end
 end

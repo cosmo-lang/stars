@@ -13,7 +13,7 @@ module Stars::CLI
   Commands:
     init                               - Initialize a `star.yml` file.
     run                                - Run the `entry_point` field of a `star.yml` file with Cosmo
-    install                            - Install dependencies, creating or using the `star.lock` file. (WIP)
+    install [<package-name>]           - Install dependencies, creating or using the `star.lock` file. (WIP)
     list                               - List installed dependencies. (WIP)
     lock [--update] [<shards>...]      - Lock dependencies in `star.lock` but doesn't install them. (WIP)
     publish [<package-name>]           - Upload a Star to the registry. (WIP)
@@ -33,6 +33,20 @@ module Stars::CLI
 
   def fatal(message : String)
     abort Color.red("fatal: #{message}"), 1
+  end
+
+  def set_star_yml_field(field_name : String, value : YAML::Any) : Nil
+    star_path = File.join path, "star.yml"
+    unless File.exists?(star_path)
+      fatal("missing star.yml")
+    end
+
+    raw_yaml = File.read(star_path)
+    star_yaml = YAML.parse(raw_yaml)
+    yaml_hash = star_yaml.as_h
+    yaml_hash[YAML::Any.new(field_name)] = value
+
+    File.write(star_path, YAML::Any.new(yaml_hash))
   end
 
   def get_star_yml_field(field_name : String, optional = false) : YAML::Any?
@@ -64,6 +78,9 @@ module Stars::CLI
         opts.on("--no-dev", "Does not install development dependencies.") do
           @@options[:no_dev] = true
         end
+        opts.on("--dev", "Install dependency as a development dependency.") do
+          @@options[:dev] = true
+        end
 
         opts.unknown_args do |args, options|
           command = (args.first? || "").downcase
@@ -79,7 +96,7 @@ module Stars::CLI
           when "run"
             Command::Run.run
           when "install"
-            Command::Install.run(args[1]?, no_dev: @@options[:no_dev]?)
+            Command::Install.run(args[1]?, no_dev: @@options[:no_dev]?, as_dev: @@options[:dev]?)
           when "list"
             fatal("not implemented yet")
             # Command::List.run(@@path, tree: args.includes?("--tree"))

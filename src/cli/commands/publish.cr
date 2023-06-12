@@ -4,7 +4,7 @@ module Stars::CLI::Command::Publish
   def run : Nil
     puts "Authorizing..."
     unless API.up?
-      abort "Failed to connect to registry. The registry is currently offline, please try again later.", 1
+      CLI.fatal "Failed to connect to registry. The registry is currently offline, please try again later."
     end
 
     username = Command.validate_input("Enter your username: ", "That user does not exist") do |username|
@@ -18,11 +18,12 @@ module Stars::CLI::Command::Publish
     ) { |password| API.user_authorized?(username, password) }
 
     puts "Successfully logged in as '#{username}'!"
-    packageName = Command.input("What do you want to name your package? ")
+    packageName = CLI.get_star_yml_field("name").to_s
     repository = CLI.get_star_yml_field("repository").to_s
     authenticationToken = API.auth_token(username)
 
     # TODO: if package exists use API.update_package (currently unimplemented)
     API.create_package(username, password, packageName, repository, authenticationToken)
+    puts "Successfully created package '#{username}/#{packageName}'!"
   end
 end

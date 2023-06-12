@@ -40,8 +40,8 @@ module Stars::CLI::Command::Init
       COSMO
       file.close
     end
-    puts "Created #{File.basename(entry_point)}."
 
+    puts "Created #{File.basename(entry_point)}."
     puts "Initializing git repository..."
     puts `git init #{CLI.path}`
   end

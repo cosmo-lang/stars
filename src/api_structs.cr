@@ -38,8 +38,6 @@ module Stars::API
 
     @[JSON::Field(key: "authenticationToken")]
     getter token : String
-    @[JSON::Field(key: "timeExpires")]
-    getter time_expires : Float32
   end
 
   struct Response

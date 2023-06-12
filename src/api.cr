@@ -37,14 +37,18 @@ module Stars::API
 
   def user_authorized?(username : String, password : String) : Bool
     return false unless user_exists?(username)
-    # TODO: fix invalid hash string? (check password and password_hash)
+    author = fetch_user(username, expose_password: true)
     Crypto::Bcrypt::Password
-      .new(fetch_user(username).password_hash)
+      .new(author.password_hash)
       .verify(password)
   end
 
-  def fetch_user(username : String) : Author
-    response = begin_request { Crest.get(URL + username) }
+  def fetch_user(username : String, expose_password = false) : Author
+    response = begin_request {
+      Crest.get URL + username,
+        {"exposePassword" => expose_password.to_s},
+        json: true
+    }
     API::Response.from_json(response.body).result.as Author
   end
 

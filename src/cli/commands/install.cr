@@ -96,7 +96,7 @@ module Stars::CLI::Command::Install
 
       verify_version(package_install_folder, version)
     else
-      version = repo.tags.first_key?
+      version = repo.tags.last_key?
       if version.nil?
         CLI.fatal "No release tags exist on repository '#{repo_name}'. Please create one and try again."
       end

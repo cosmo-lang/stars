@@ -1,10 +1,10 @@
-![build](https://github.com/cosmo-lang/stars/actions/workflows/crystal.yml/badge.svg)
 # Stars
 
-Stars is a package manager for the Cosmo programming language.
+Stars is a package manager for the Cosmo programming language. It is in no way finished currently, but you can still build it and have it work for the most part.
 
 # Todo
 
+- Make installed packages add their dependencies directly to `.stars`
 - Version schemes
   * `~1.6.1` (`1.0.0` to `1.6.1`)
   * `^3.2.3` (`3.2.3` or higher)

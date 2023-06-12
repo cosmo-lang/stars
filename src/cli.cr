@@ -31,17 +31,21 @@ module Stars::CLI
     @@path
   end
 
+  def fatal(message : String)
+    abort Color.red("fatal: #{message}"), 1
+  end
+
   def get_star_yml_field(field_name : String, optional = false) : YAML::Any?
     star_path = File.join path, "star.yml"
     unless File.exists?(star_path)
-      abort "fatal: missing star.yml", 1
+      fatal("missing star.yml")
     end
 
     raw_yaml = File.read(star_path)
     star_yaml = YAML.parse(raw_yaml)
     value = star_yaml[field_name]?
     if value.nil? && !optional
-      abort "fatal: missing '#{field_name}' field in star.yml", 1
+      fatal("missing '#{field_name}' field in star.yml")
     end
 
     value
@@ -77,10 +81,10 @@ module Stars::CLI
           when "install"
             Command::Install.run(args[1]?, no_dev: @@options[:no_dev]?)
           when "list"
-            puts "fatal: not implemented yet"
+            fatal("not implemented yet")
             # Command::List.run(@@path, tree: args.includes?("--tree"))
           when "lock"
-            puts "fatal: not implemented yet"
+            fatal("not implemented yet")
             # Command::Lock.run(
             #   @@path,
             #   args[1..-1].reject(&.starts_with?("--")),
@@ -91,7 +95,7 @@ module Stars::CLI
           when "register"
             Command::Register.run
           when "update"
-            puts "fatal: not implemented yet"
+            fatal("not implemented yet")
             # Command::Update.run(
             #   @@path,
             #   args[1..-1].reject(&.starts_with?("--"))

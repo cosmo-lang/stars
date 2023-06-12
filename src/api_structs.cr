@@ -5,12 +5,18 @@ module Stars::API
     include JSON::Serializable
 
     getter id : String
+
+    @[JSON::Field(key: "fullName")]
+    getter full_name : String
     getter name : String
     getter repository : String
-    getter author : Author
 
+    @[JSON::Field(key: "authorName")]
+    getter author_name : String
     @[JSON::Field(key: "authorId")]
     getter author_id : String
+    @[JSON::Field(key: "timeCreated")]
+    getter time_created : Float32
   end
 
   struct Author
@@ -23,6 +29,8 @@ module Stars::API
     @[JSON::Field(key: "passwordHash")]
     getter password_hash : String?
     getter packages : Array(Package)
+    @[JSON::Field(key: "timeCreated")]
+    getter time_created : Float32
   end
 
   struct AuthenticationInfo
@@ -30,6 +38,8 @@ module Stars::API
 
     @[JSON::Field(key: "authenticationToken")]
     getter token : String
+    @[JSON::Field(key: "timeExpires")]
+    getter time_expires : Float32
   end
 
   struct Response

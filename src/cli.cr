@@ -35,8 +35,8 @@ module Stars::CLI
     abort Color.red("fatal: #{message}"), 1
   end
 
-  def set_star_yml_field(field_name : String, value : YAML::Any) : Nil
-    star_path = File.join path, "star.yml"
+  def set_star_yml_field(field_name : String, value : YAML::Any, search_path = path) : Nil
+    star_path = File.join search_path, "star.yml"
     unless File.exists?(star_path)
       fatal("missing star.yml")
     end
@@ -49,8 +49,8 @@ module Stars::CLI
     File.write(star_path, YAML::Any.new(yaml_hash))
   end
 
-  def get_star_yml_field(field_name : String, optional = false) : YAML::Any?
-    star_path = File.join path, "star.yml"
+  def get_star_yml_field(field_name : String, optional = false, search_path = path) : YAML::Any?
+    star_path = File.join search_path, "star.yml"
     unless File.exists?(star_path)
       fatal("missing star.yml")
     end
